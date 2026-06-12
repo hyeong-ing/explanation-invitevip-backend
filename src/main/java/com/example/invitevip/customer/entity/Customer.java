@@ -48,21 +48,34 @@ public class Customer {
     // entity 폴더 안에 InviteCode 클래스가 있음.
     @Embedded
     // InviteCode 내부 필드의 컬럼 설정을 Customer Entity에서 재정의한다.
-    // InviteCode 안에는 아마 value 필드가 있다.
-    //
+    // value 필드를 DB에서는 code라는 컬럼명으로 저장하겠다는 의미이다.
+    // nullable = false는 code 값이 반드시 있어야 하며 length = 4는 4자리로 제한한다는 뜻이다.
     @AttributeOverride(name = "value", column = @Column(name = "code", nullable = false, length = 4))
+    // 고객 초대코드를 저장하는 필드이다.
+    // String code로 바로 두지 않고 InviteCode 값 객체로 감싸서 사용한다.
+    // 이렇게 하면 초대코드 관련 규칙을 InviteCode 클래스 안에 모을 수 있다.
     private InviteCode inviteCode;
 
     @Column(length = 255)
     private String note;
 
+    // Customer 객체를 생성하기 위한 정적 팩토리 메서드이다.
     public static Customer create(String name, String grade, String phone, InviteCode inviteCode, String note) {
+
+        // Customer 객체를 생성한다.
         Customer customer = new Customer();
+        // update 메서드를 호출해서 고객이름, 등급.. 등을 채운대.
+        // // 생성할 때와 수정할 때 같은 로직을 재사용하는 구조이다.
         customer.update(name, grade, phone, inviteCode, note);
+        // 값이 채워진 Customer 객체를 반환한다.
         return customer;
     }
 
+    // 기존 Customer 객체의 정보를 수정하는 메서드이다.
+    // 이렇게 하면 고객 정보 수정 로직을 한 곳에서 관리할 수 있다.
     public void update(String name, String grade, String phone, InviteCode inviteCode, String note) {
+
+        // 고객 정보를 새 값으로 변경한다.
         this.name = name;
         this.grade = grade;
         this.phone = phone;
@@ -70,7 +83,13 @@ public class Customer {
         this.note = note;
     }
 
+    // 초대코드 값을 문자열로 꺼내는 메서드이다.
+    // Customer 내부에서는 InviteCode 객체로 보관하지만,
+    // 응답 DTO나 화면에서는 "1234" 같은 문자열 코드가 필요할 수 있다.
     public String getCode() {
+
+        // inviteCode 객체 안에 들어 있는 실제 문자열 값을 꺼내서 반환한다.
+        // 예: InviteCode(value = "1234")라면 "1234"를 반환한다.
         return inviteCode.getValue();
     }
 }
